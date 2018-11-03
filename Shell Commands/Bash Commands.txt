@@ -1,0 +1,7 @@
+pwd
+
+cp
+
+mv
+
+rm
