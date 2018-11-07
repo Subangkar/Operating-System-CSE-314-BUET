@@ -1,7 +1,0 @@
-pwd
-
-cp
-
-mv
-
-rm
