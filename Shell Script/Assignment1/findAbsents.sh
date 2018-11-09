@@ -20,7 +20,7 @@ function genAbsList() {
        # echo "$sid,$sname" >> "$2"
        appendToFile "$sid,$sname" "$2"
        # echo "$sid $sname 0" >> "$3"
-       appendToFile "$sid $sname 0" "$3"
+       appendToFile "$sid 0" "$3"
     fi
 
   done

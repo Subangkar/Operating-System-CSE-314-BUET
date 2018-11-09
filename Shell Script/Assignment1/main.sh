@@ -25,3 +25,13 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 ./findAbsents.sh
 
 ./unzipEach.sh
+
+
+
+
+
+
+
+
+
+cat "$FILE_MARKS" | sort
