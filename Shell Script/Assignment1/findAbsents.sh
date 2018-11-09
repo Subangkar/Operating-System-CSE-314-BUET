@@ -1,8 +1,8 @@
 #!/bin/bash
 
-. data.sh
-
-. findID.sh
+. ./data.sh
+. ./util.sh
+. ./findID.sh
 
 
 # Generates initial absent log
@@ -17,8 +17,10 @@ function genAbsList() {
     hasStdID $sid
 
     if [[ $RET_VAL_BOOL == 0 ]]; then
-       echo "$sid,$sname" >> "$2"
-       echo "$sid $sname 0" >> "$3"
+       # echo "$sid,$sname" >> "$2"
+       appendToFile "$sid,$sname" "$2"
+       # echo "$sid $sname 0" >> "$3"
+       appendToFile "$sid $sname 0" "$3"
     fi
 
   done
@@ -27,9 +29,5 @@ function genAbsList() {
 ##############
 
 
-
-# if [ ! -d "$directory" ]; then
-mkdir -p $DIR_LOG
-# fi
 
 genAbsList $FILE_ROSTER $FILE_ABS $FILE_MARKS
