@@ -1,7 +1,16 @@
 #!/bin/bash
 
-unzip SubmissionsAll.zip -d workingDir
+# mkdir output
 
-cd workingDir
+# cp SubmissionsAll.zip output/
+# cd output
+echo ">> Extracting Files\n"
+unzip -o SubmissionsAll.zip -d output/
+echo ">> Extracted Files\n"
+# rm output/SubmissionsAll.zip
 
-ls
+# unzip SubmissionsAll.zip -d workingDir
+
+# cd workingDir
+
+# ls
