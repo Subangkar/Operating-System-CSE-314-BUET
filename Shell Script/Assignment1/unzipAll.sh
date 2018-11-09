@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# mkdir output
 
 # cp SubmissionsAll.zip output/
 # cd output
