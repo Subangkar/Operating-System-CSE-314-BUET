@@ -1,6 +1,6 @@
 #!/bin/bash
 
-deleteFolder(){
+deleteFolder() {
   if [ -d "$1" ]; then
     rm -d -r -f "$1"
   fi
@@ -16,7 +16,7 @@ createFolder() {
 
 
 
-deleteFile(){
+deleteFile() {
   if [ -f "$1" ]; then
     rm -f "$1"
   fi
@@ -32,8 +32,7 @@ createFile() {
 
 
 # @param contents fileName
-function appendToFile()
-{
+appendToFile() {
   if [ ! -f "$2" ]; then
     touch $2
   fi
@@ -48,5 +47,6 @@ function appendToFile()
 extractZip() {
   zipname="$1";
   path="$2"
-  unzip -o "$zipname" -d "$path/"
+  echo "Extracting: $zipname"
+  unzip -qq -o "$zipname" -d "$path/"
 }

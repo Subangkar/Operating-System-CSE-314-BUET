@@ -15,10 +15,13 @@ createFile $FILE_MARKS
 
 
 extractZip SubmissionsAll.zip $DIR_OUTPUT
+# deletes RARs
+find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
+
 
 
 
 #### 1
 ./findAbsents.sh
 
-# ./unzipEach.sh
+./unzipEach.sh

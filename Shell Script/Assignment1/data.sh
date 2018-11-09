@@ -3,6 +3,12 @@
 
 # GLOBAL VARIABLES
 
+
+_digit='[0-9]'
+_integer="$_digit\{1,\}"
+_stdname="[^_]\{1,\}"
+
+
 RET_VAL_BOOL=1
 RET_VAL=''
 
