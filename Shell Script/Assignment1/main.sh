@@ -27,11 +27,4 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 ./unzipEach.sh
 
 
-
-
-
-
-
-
-
 # cat "$FILE_MARKS" | sort
