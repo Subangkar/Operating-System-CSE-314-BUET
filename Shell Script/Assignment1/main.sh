@@ -34,4 +34,4 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 
 
 
-cat "$FILE_MARKS" | sort
+# cat "$FILE_MARKS" | sort

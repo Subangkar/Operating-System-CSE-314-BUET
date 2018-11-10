@@ -40,6 +40,12 @@ appendToFile() {
 }
 
 
+# @param contents fileName
+deleteFromFileI() {
+  newContents=`grep -i -v "$1" $2`;
+  echo "$newContents" > $2
+}
+
 
 # TODO extractZip's description
 # @param zipname
