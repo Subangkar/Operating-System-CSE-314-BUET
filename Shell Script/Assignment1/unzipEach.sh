@@ -7,7 +7,7 @@
 
 
 # @param zipname folderName
-resolveStdID() {
+resolveStdID() { # already marked 0
   # zipname="$1"
   # folderNameSub="$2"
   stdname=`echo "$zipname" | cut -d"_" -f 1`;
@@ -38,7 +38,7 @@ organizeNonIDFolder() {
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
     mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
     mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
-    # appendToFile "$renamedFolder 0" $FILE_MARKS
+    appendToFile "$renamedFolder 0" $FILE_MARKS
     echo $renamedFolder
   else
     resolveStdID "$zipname" "$folderNameSub"
@@ -54,7 +54,7 @@ organizeMultipleFolder() {
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
     mv "$DIR_TEMP" "$renamedFolder"
     mv "$renamedFolder" $DIR_EXT
-    # appendToFile "$renamedFolder 0" $FILE_MARKS
+    appendToFile "$renamedFolder 0" $FILE_MARKS
   else    # don't have ID in zipname
     resolveStdID "$zipname" "";
   fi
