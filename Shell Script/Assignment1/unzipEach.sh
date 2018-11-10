@@ -5,16 +5,11 @@
 . util.sh
 
 
-./findAbsents.sh
-
-
-
-
 
 # @param zipname folderName
 resolveStdID() {
-  zipname="$1"
-  folderNameSub="$2"
+  # zipname="$1"
+  # folderNameSub="$2"
   stdname=`echo "$zipname" | cut -d"_" -f 1`;
   renamedFolder=`grep -i "$stdname" $FILE_ABS | cut -d"," -f 1`
   numMatches=`echo -n "$renamedFolder" | grep -c '^'`;
@@ -37,26 +32,29 @@ resolveStdID() {
 
 # @param zipname folderName
 organizeNonIDFolder() {
-  zipname="$1"
-  folderNameSub="$2"
+  # zipname="$1"
+  # folderNameSub="$2"
   if [[ $zipname =~ ^[^_]+_[0-9]+_assignsubmission_file_[0-9]{7}.*$ ]]; then #[^_]*_[0-9]_assignsubmission_file
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
     mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
     mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
-    appendToFile "$renamedFolder 0" $FILE_MARKS
+    # appendToFile "$renamedFolder 0" $FILE_MARKS
+    echo $renamedFolder
   else
     resolveStdID "$zipname" "$folderNameSub"
   fi
 }
 
-# @param zipname
+# @param zipname folderName
 organizeMultipleFolder() {
+  # zipname="$1"
+  # folderNameSub="$2"
   # has ID in zipname
   if [[ $zipname =~ ^[^_]+_[0-9]+_assignsubmission_file_[0-9]{7}.*$ ]]; then #[^_]*_[0-9]_assignsubmission_file
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
     mv "$DIR_TEMP" "$renamedFolder"
     mv "$renamedFolder" $DIR_EXT
-    appendToFile "$renamedFolder 0" $FILE_MARKS
+    # appendToFile "$renamedFolder 0" $FILE_MARKS
   else    # don't have ID in zipname
     resolveStdID "$zipname" "";
   fi
@@ -73,14 +71,17 @@ organizeZip() {
   # appendToFile "1505015,abc" $FILE_ABS
   # appendToFile "1505016,abc" $FILE_ABS
   zipname="$1";
+
+
   if [ "$(find $DIR_TEMP -maxdepth 1 -printf %y)" = "dd" ]; then
     # It has only one subdirectory and no other content
     folderNameSub=`ls $DIR_TEMP`
-    if [[ $folderNameSub =~ ^[0-9]{7}$ ]]; then #$folderNameSub =~ ^[0-9]{7}$
+    if [[ $folderNameSub =~ ^[0-9]{7}$ ]]; then
+      #perfect Ok
       mv "$DIR_TEMP/$folderNameSub" $DIR_OUTPUT
-      # echo $folderName
       appendToFile "$folderNameSub 10" $FILE_MARKS
     elif [[ $folderNameSub =~ ^[0-9]{7}\_.*$ ]]; then
+      # half Ok
       renamedFolder=`echo "$folderNameSub" | cut -d"_" -f 1`
       # echo $renamedFolder
       mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
@@ -104,6 +105,6 @@ organizeZip() {
 IFS=$'\n'
 for zip in `find "output" -type f -name '*.zip'`; do
   organizeZip "$zip"
-  deleteFile "$zip"
+  # deleteFile "$zip"
 done
-deleteFolder $DIR_TEMP
+# deleteFolder $DIR_TEMP

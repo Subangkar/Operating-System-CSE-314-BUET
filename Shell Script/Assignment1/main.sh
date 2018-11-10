@@ -20,7 +20,6 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 
 
 
-
 #### 1
 ./findAbsents.sh
 
@@ -29,3 +28,5 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 
 sortedID=`cat "$FILE_MARKS" | sort`
 echo "$sortedID" > $FILE_MARKS
+sortedID=`cat "$FILE_ABS" | sort`
+echo "$sortedID" > $FILE_ABS
