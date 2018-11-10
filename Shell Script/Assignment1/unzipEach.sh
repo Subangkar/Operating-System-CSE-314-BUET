@@ -58,23 +58,7 @@ organizeZip() {
       mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
       appendToFile "$renamedFolder 5" $FILE_MARKS
     else
-      # echo $zipname
-      if [[ $zipname =~ ^[^_]+_[0-9]+_assignsubmission_file_[0-9]{7}.*$ ]]; then #[^_]*_[0-9]_assignsubmission_file
-        renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
-        # echo $renamedFolder
-        # mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
-        # mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
-        # appendToFile "$renamedFolder 0" $FILE_MARKS
-      else
-        # echo $zipname
-        stdname=`echo "$zipname" | cut -d"_" -f 1`;
-        # echo $stdname
-        renamedFolder=`grep -i "$stdname" $FILE_ABS | cut -d"," -f 1`
-        deleteFromFileI "$renamedFolder,$stdname" $FILE_ABS
-      fi
-      mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
-      mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
-      appendToFile "$renamedFolder 0" $FILE_MARKS
+      organizeNonIDFolder $zipname;
     fi
   else
     organizeNonIDFolder $zipname
