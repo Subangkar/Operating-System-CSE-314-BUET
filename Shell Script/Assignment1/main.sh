@@ -21,7 +21,9 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 
 
 #### 1
+
 ./findAbsents.sh
+
 
 ./unzipEach.sh
 

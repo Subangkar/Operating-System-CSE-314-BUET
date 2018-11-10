@@ -21,7 +21,7 @@ resolveStdID() { # already marked 0
     echo "id single match"
     if [ -z "$folderNameSub" ]; then
       echo "multiple subdirectory"
-      mv "$DIR_TEMP/" "$DIR_EXT/$renamedFolder"
+      mv "$DIR_TEMP/" "$DIR_OUTPUT/$renamedFolder"
     else
       echo "single subdirectory"
       mv "$DIR_TEMP/$folderNameSub" "$DIR_OUTPUT/$renamedFolder"
@@ -36,8 +36,9 @@ organizeNonIDFolder() {
   # folderNameSub="$2"
   if [[ $zipname =~ ^[^_]+_[0-9]+_assignsubmission_file_[0-9]{7}.*$ ]]; then #[^_]*_[0-9]_assignsubmission_file
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
-    mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
-    mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
+    # mv "$DIR_TEMP/$folderNameSub" "$DIR_TEMP/$renamedFolder"
+    # mv "$DIR_TEMP/$renamedFolder" $DIR_OUTPUT
+    mv "$DIR_TEMP/$folderNameSub" "$DIR_OUTPUT/$renamedFolder"
     appendToFile "$renamedFolder 0" $FILE_MARKS
     echo $renamedFolder
   else
@@ -52,8 +53,8 @@ organizeMultipleFolder() {
   # has ID in zipname
   if [[ $zipname =~ ^[^_]+_[0-9]+_assignsubmission_file_[0-9]{7}.*$ ]]; then #[^_]*_[0-9]_assignsubmission_file
     renamedFolder=`echo "$zipname" | cut -d"_" -f 5 | head -c 7`
-    mv "$DIR_TEMP" "$renamedFolder"
-    mv "$renamedFolder" $DIR_EXT
+    mv "$DIR_TEMP" "$DIR_OUTPUT/$renamedFolder"
+    # mv "$renamedFolder" $DIR_EXT
     appendToFile "$renamedFolder 0" $FILE_MARKS
   else    # don't have ID in zipname
     resolveStdID "$zipname" "";
@@ -105,6 +106,6 @@ organizeZip() {
 IFS=$'\n'
 for zip in `find "output" -type f -name '*.zip'`; do
   organizeZip "$zip"
-  # deleteFile "$zip"
+  deleteFile "$zip"
 done
-# deleteFolder $DIR_TEMP
+deleteFolder $DIR_TEMP
