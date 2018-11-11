@@ -27,8 +27,15 @@ find $DIR_OUTPUT -type f -name '*.rar' -exec rm {} \;
 
 ./unzipEach.sh
 
+echo "All done"
 
-sortedID=`cat "$FILE_MARKS" | sort`
-echo "$sortedID" > $FILE_MARKS
-sortedID=`cat "$FILE_ABS" | sort`
-echo "$sortedID" > $FILE_ABS
+# sortedID=`cat "$FILE_MARKS" | sort`
+sort -o "$FILE_MARKS" "$FILE_MARKS"
+sort -o "$FILE_ABS" "$FILE_ABS"
+# echo "$sortedID" > $FILE_MARKS
+# sortedID=`cat "$FILE_ABS" | sort`
+# echo "$sortedID" > $FILE_ABS
+# cut -d"," -f 1 |
+echo "$(sed "s/[^0-9]//g" "$FILE_ABS")" > "$FILE_ABS"
+
+echo "Results sorted"
