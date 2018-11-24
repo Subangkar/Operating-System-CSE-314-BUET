@@ -1,0 +1,6 @@
+
+*.out
+
+IPC/Prac/Semaphore/\.idea/
+
+IPC/Prac/Semaphore/cmake-build-debug/

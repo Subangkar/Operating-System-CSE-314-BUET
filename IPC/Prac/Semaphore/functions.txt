@@ -1,0 +1,1 @@
+waitpid(childPid, &returnStatus, 0);  // Parent process waits here for child to terminate.

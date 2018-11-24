@@ -1,3 +1,4 @@
+// A call to wait() blocks the calling process until one of its child processes exits or a signal is received. After child process terminates, parent continues its execution after wait system call instruction.
 #include<sys/types.h>
 #include<sys/wait.h>
 #include<unistd.h>
