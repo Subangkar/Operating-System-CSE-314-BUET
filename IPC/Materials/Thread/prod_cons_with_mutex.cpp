@@ -2,6 +2,7 @@
 #include<pthread.h>
 #include<semaphore.h>
 #include<queue>
+#include<zconf.h>
 using namespace std;
 
 
