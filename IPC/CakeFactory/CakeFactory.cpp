@@ -18,10 +18,13 @@
 using namespace std;
 
 
-#define RANDOM_TIME static_cast<unsigned int>(rand()%4)
+#define RANDOM_TIME 0//// static_cast<unsigned int>(rand()%4)
 
 
 #define MAX_NO_OF_CAKES 5
+#define MAX_NO_OF_PRODUCDED_CAKES 5
+#define MAX_NO_OF_VANILLA_CAKES 5
+#define MAX_NO_OF_CHOCOLATE_CAKES 5
 
 #define CAKE_CHOCOLATE "Chocolate Cake"
 #define CAKE_VANILLA "Vanilla Cake"
@@ -37,11 +40,6 @@ using namespace std;
 typedef string cake_t;
 typedef string chef_t;
 
-//semaphore to control sleep and wake up
-//sem_t emp;
-//sem_t full;
-//queue<int> q;
-//pthread_mutex_t lock;
 
 pthread_mutex_t lock_console;
 
@@ -82,13 +80,13 @@ void unlock(pthread_mutex_t &lockVar) {
 
 
 void initLocks() {
-	sem_init(&q1_empty, 0, MAX_NO_OF_CAKES);
+	sem_init(&q1_empty, 0, MAX_NO_OF_PRODUCDED_CAKES);
 	sem_init(&q1_full, 0, 0);
 
-	sem_init(&qVanilla_empty, 0, MAX_NO_OF_CAKES);
+	sem_init(&qVanilla_empty, 0, MAX_NO_OF_VANILLA_CAKES);
 	sem_init(&qVanilla_full, 0, 0);
 
-	sem_init(&qChocolate_empty, 0, MAX_NO_OF_CAKES);
+	sem_init(&qChocolate_empty, 0, MAX_NO_OF_CHOCOLATE_CAKES);
 	sem_init(&qChocolate_full, 0, 0);
 
 	pthread_mutex_init(&lock_Q1, nullptr);
@@ -100,13 +98,13 @@ void initLocks() {
 
 void printInConsoleWithLocking(const string &msg) {
 	lock(lock_console);
-	cout << msg << endl;
+	cout << msg << endl << endl;
 	unlock(lock_console);
 }
 
 void printInConsole(const string &msg) {
 //	pthread_mutex_lock(&lock_console);
-	cout << msg << endl;
+	cout << msg << endl << endl;
 //	pthread_mutex_unlock(&lock_console);
 }
 
@@ -124,17 +122,18 @@ cake_t popFromQ1(const chef_t &chef) {
 	lock(lock_Q1);
 	cake_t cake = q1.front();
 	q1.pop();
+	size_t qSize = q1.size();
+	semaphoreV(q1_empty);// wake waiting chef
 	lock(lock_console);
 	unlock(lock_Q1);
-	printInConsole(chef + " has just taken a " + cake + " from Queue1\n" + "#Cakes in Q1: " + to_string(q1.size()));
+	printInConsole(chef + " has just taken a " + cake + " from Queue1\n" + "#Cakes in Q1: " + to_string(qSize));
 	unlock(lock_console);
 	return cake;
 }
 
 cake_t lookIntoQ1(const chef_t &chef) {
 	lock(lock_Q1);
-	cake_t cake;
-	cake = q1.front();
+	cake_t cake = q1.front();
 	lock(lock_console);
 	unlock(lock_Q1);
 	printInConsole(
@@ -168,23 +167,31 @@ void *chocolateChef(void *arg) {
 void *carrierChef(void *arg) {
 	printInConsoleWithLocking((char *) arg);
 	while (true) {
-//		sleep(4);
-//		semaphoreP(q1_full);
-//		cake_t topCakeQ1 = lookIntoQ1(CHEF_Z);
-//		semaphoreV(q1_empty);
 		semaphoreP(q1_full);
 		sleep(RANDOM_TIME);
 		cake_t topCakeQ1 = lookIntoQ1(CHEF_Z);
 		if (topCakeQ1 == CAKE_VANILLA) {
 			semaphoreP(qVanilla_empty);
 			cake_t cake = popFromQ1(CHEF_Z);
-			semaphoreV(q1_empty);
+			lock(lock_VanillaQ);
+			size_t qSize = ++nVanilla;
+			unlock(lock_VanillaQ);
+			lock(lock_console);
 			semaphoreV(qVanilla_full);
+			printInConsole(CHEF_Z + " has just put a " + cake + " in Queue_Vanilla\n" + "#Cakes in QVanilla: " +
+			               to_string(qSize));
+			unlock(lock_console);
 		} else if (topCakeQ1 == CAKE_CHOCOLATE) {
 			semaphoreP(qChocolate_empty);
 			cake_t cake = popFromQ1(CHEF_Z);
-			semaphoreV(q1_empty);// can be moved upper
+			lock(lock_ChocolateQ);
+			size_t qSize = ++nChocolate;
+			unlock(lock_ChocolateQ);
+			lock(lock_console);
 			semaphoreV(qChocolate_full);
+			printInConsole(CHEF_Z + " has just put a " + cake + " in Queue_Chocolate\n" + "#Cakes in QChocolate: " +
+			               to_string(qSize));
+			unlock(lock_console);
 		}
 	}
 }
@@ -195,11 +202,13 @@ void *vanillaWaiter(void *arg) {
 	while (true) {
 		semaphoreP(qVanilla_full);
 		sleep(RANDOM_TIME);
-		--nVanilla;
+		lock(lock_VanillaQ);
+		size_t qSize = --nVanilla;
+		unlock(lock_VanillaQ);
 		lock(lock_console);
 		semaphoreV(qVanilla_empty);
 		printInConsole(WAITER_VANILLA + " has just sold a cake from Queue_Vanilla\n" + "#Cakes in QVanilla: " +
-		               to_string(nVanilla));
+		               to_string(qSize));
 		unlock(lock_console);
 	}
 }
@@ -209,17 +218,21 @@ void *chocolateWaiter(void *arg) {
 	while (true) {
 		semaphoreP(qChocolate_full);
 		sleep(RANDOM_TIME);
-		--nChocolate;
+		lock(lock_ChocolateQ);
+		size_t qSize = --nChocolate;
+		unlock(lock_ChocolateQ);
 		lock(lock_console);
 		semaphoreV(qChocolate_empty);
 		printInConsole(WAITER_CHOCOLATE + " has just sold a cake from Queue_Chocolate\n" + "#Cakes in QChocolate: " +
-		               to_string(nVanilla));
+		               to_string(qSize));
 		unlock(lock_console);
 	}
 }
 
 
 int main() {
+	freopen("out.log", "w", stdout);
+
 	srand(static_cast<unsigned int>(time(nullptr)));
 
 	pthread_t threadChefX, threadChefY, threadChefZ;
@@ -230,6 +243,10 @@ int main() {
 	pthread_create(&threadChefX, nullptr, chocolateChef, (void *) "Chef X Started");
 	pthread_create(&threadChefY, nullptr, vanillaChef, (void *) "Chef Y Started");
 	pthread_create(&threadChefZ, nullptr, carrierChef, (void *) "Chef Z Started");
+
+	sleep(15);
+	pthread_create(&threadWaiterChocolate, nullptr, chocolateWaiter, (void *) "Chocolate Waiter Started");
+	pthread_create(&threadWaiterVanilla, nullptr, vanillaWaiter, (void *) "Vanilla Waiter Started");
 
 
 	pthread_join(threadChefX, nullptr);
