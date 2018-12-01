@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-msc32-c"
-#pragma ide diagnostic ignored "cert-msc30-c"
 //
 // Created by subangkar on 11/29/18.
 //
@@ -13,8 +10,8 @@
 #include <string>
 #include <iostream>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
+
 using namespace std;
 
 
@@ -280,18 +277,18 @@ int main() {
 	pthread_create(&threadChefY, nullptr, vanillaChef, (void *) "\n>>> Chef Y Started\n");
 	pthread_create(&threadChefZ, nullptr, carrierChef, (void *) "\n>>> Chef Z Started\n");
 
-	sleep(1);
+//	sleep(2);
 	pthread_create(&threadWaiterChocolate, nullptr, chocolateWaiter, (void *) "\n>>> Chocolate Waiter Started\n");
 	pthread_create(&threadWaiterVanilla, nullptr, vanillaWaiter, (void *) "\n>>> Vanilla Waiter Started\n");
 
-	sleep(1);
-	timeoutPassed = true;
+//	sleep(1);
+//	timeoutPassed = true;
 
-//	pthread_join(threadChefX, nullptr);
-//	pthread_join(threadChefY, nullptr);
-//	pthread_join(threadChefZ, nullptr);
-//	pthread_join(threadWaiterChocolate, nullptr);
-//	pthread_join(threadWaiterVanilla, nullptr);
+	pthread_join(threadChefX, nullptr);
+	pthread_join(threadChefY, nullptr);
+	pthread_join(threadChefZ, nullptr);
+	pthread_join(threadWaiterChocolate, nullptr);
+	pthread_join(threadWaiterVanilla, nullptr);
 
 	return 0;
 }
