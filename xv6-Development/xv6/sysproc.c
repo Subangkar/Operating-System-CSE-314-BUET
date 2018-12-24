@@ -89,3 +89,13 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+
+// added system call's actual implementation
+int
+sys_subangkar_shanto(void)
+{
+  cprintf("Subangkar Karmaker Shanto 23-04-1997\n");
+  return 1505015;
+}

@@ -24,6 +24,9 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
+int subangkar_shanto(void);
+// added system call function to link with user program
+
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

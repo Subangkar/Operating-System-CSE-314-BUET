@@ -4,6 +4,6 @@
 
 int main(void)
 {
-    printf(1, "Subangkar Shanto on xv6\n");
+    printf(1, "%d\n", subangkar_shanto());
     exit();
 }
