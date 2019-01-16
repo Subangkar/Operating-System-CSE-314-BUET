@@ -1,0 +1,419 @@
+commit 02195eee285ee63f3aae983a85a6fdaec47fafd6
+Author: Saifur Rahman <saifur80@gmail.com>
+Date:   Sun Jan 13 22:07:13 2019 +0600
+
+    xv6 Socket API stub for students
+
+diff --git a/Makefile b/Makefile
+index 09d790c..e011a93 100644
+--- a/Makefile
++++ b/Makefile
+@@ -16,12 +16,14 @@ OBJS = \
+ 	pipe.o\
+ 	proc.o\
+ 	sleeplock.o\
++	sock.o\
+ 	spinlock.o\
+ 	string.o\
+ 	swtch.o\
+ 	syscall.o\
+ 	sysfile.o\
+ 	sysproc.o\
++	syssock.o\
+ 	trapasm.o\
+ 	trap.o\
+ 	uart.o\
+@@ -181,6 +183,7 @@ UPROGS=\
+ 	_usertests\
+ 	_wc\
+ 	_zombie\
++	_socktest\
+ 
+ fs.img: mkfs README $(UPROGS)
+ 	./mkfs fs.img README $(UPROGS)
+diff --git a/defs.h b/defs.h
+index 82fb982..ae6ae7e 100644
+--- a/defs.h
++++ b/defs.h
+@@ -121,6 +121,14 @@ int             wait(void);
+ void            wakeup(void*);
+ void            yield(void);
+ 
++// sock.c
++void            sinit(void);
++int             listen(int);
++int             connect(int, const char*);
++int             send(int, const char*, int);
++int             recv(int, char*, int);
++int             disconnect(int);
++
+ // swtch.S
+ void            swtch(struct context**, struct context*);
+ 
+diff --git a/main.c b/main.c
+index 9924e64..ac0b23e 100644
+--- a/main.c
++++ b/main.c
+@@ -4,6 +4,7 @@
+ #include "memlayout.h"
+ #include "mmu.h"
+ #include "proc.h"
++#include "sock.h"
+ #include "x86.h"
+ 
+ static void startothers(void);
+@@ -27,10 +28,11 @@ main(void)
+   consoleinit();   // console hardware
+   uartinit();      // serial port
+   pinit();         // process table
++  sinit();         // socket table
+   tvinit();        // trap vectors
+   binit();         // buffer cache
+   fileinit();      // file table
+-  ideinit();       // disk 
++  ideinit();       // disk
+   startothers();   // start other processors
+   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
+   userinit();      // first user process
+diff --git a/param.h b/param.h
+index a7e90ef..f8e5027 100644
+--- a/param.h
++++ b/param.h
+@@ -1,3 +1,5 @@
++#define NPORT       128  // maximum number of ports
++#define NSOCK        32  // maximum number of sockets
+ #define NPROC        64  // maximum number of processes
+ #define KSTACKSIZE 4096  // size of per-process kernel stack
+ #define NCPU          8  // maximum number of CPUs
+diff --git a/sock.c b/sock.c
+new file mode 100644
+index 0000000..4d92581
+--- /dev/null
++++ b/sock.c
+@@ -0,0 +1,70 @@
++#include "types.h"
++#include "defs.h"
++#include "param.h"
++#include "spinlock.h"
++#include "sock.h"
++#include "memlayout.h"
++#include "mmu.h"
++#include "x86.h"
++#include "proc.h"
++
++//
++// TODO: Create a structure to maintain a list of sockets
++// Should it have locking?
++//
++
++void
++sinit(void)
++{
++  //
++  // TODO: Write any initialization code for socket API
++  // initialization.
++  //
++}
++
++int
++listen(int lport) {
++
++  //
++  // TODO: Put the actual implementation of listen here.
++  //
++
++  return 0;
++}
++
++int
++connect(int rport, const char* host) {
++  //
++  // TODO: Put the actual implementation of connect here.
++  //
++
++  return 0;
++}
++
++int
++send(int lport, const char* data, int n) {
++  //
++  // TODO: Put the actual implementation of send here.
++  //
++
++  return 0;
++}
++
++
++int
++recv(int lport, char* data, int n) {
++  //
++  // TODO: Put the actual implementation of recv here.
++  //
++
++  return 0;
++}
++
++int
++disconnect(int lport) {
++  //
++  // TODO: Put the actual implementation of disconnect here.
++  //
++
++  return 0;
++}
+diff --git a/sock.h b/sock.h
+new file mode 100644
+index 0000000..2ab24fe
+--- /dev/null
++++ b/sock.h
+@@ -0,0 +1,8 @@
++
++//
++// TODO: Define an enumeration to represent socket state.
++//
++
++//
++// TODO: Define a structure to represent a socket.
++//
+diff --git a/socktest.c b/socktest.c
+new file mode 100644
+index 0000000..b68a705
+--- /dev/null
++++ b/socktest.c
+@@ -0,0 +1,77 @@
++#include "types.h"
++#include "user.h"
++
++int serverPort = 10;
++
++void clientProc() {
++  int clientPort;
++  char buf[128];
++  char host[16] = "localhost";
++
++  // sleep for 100 clock ticks to ensure that the server process starts first.
++  sleep(100);
++
++  printf(1, "Client>> Attempting to connect to port %d, host %s ...\n", serverPort, host);
++  clientPort = connect(serverPort, host);
++  sleep(20);
++  printf(1, "Client>> connect() returned %d\n", clientPort);
++
++  while (1) {
++    printf(1, "Client>> Enter text to send to server: ");
++    gets(buf, sizeof(buf));
++    buf[strlen(buf) - 1] = '\0'; // Eliminating the '\n'
++    send(clientPort, buf, strlen(buf) + 1);
++
++    if (0 == strcmp(buf, "exit")) {
++      printf(1, "Client exiting...\n");
++      disconnect(clientPort);
++      break;
++    }
++
++    sleep(100 + uptime() % 100);
++
++    recv(clientPort, buf, sizeof(buf));
++    printf(1, "Client>> Received: \"%s\"\n", buf);
++  }
++}
++
++void serverProc() {
++  int status;
++  char buf[128];
++
++  printf(1, "Server>> Starting to listen at port %d ...\n", serverPort);
++  status = listen(serverPort);
++  printf(1, "Server>> listen() returned %d\n", status);
++
++  while (1) {
++    sleep(100 + uptime() % 100);
++
++    recv(serverPort, buf, sizeof(buf));
++    printf(1, "Server>> Received: \"%s\"\n", buf);
++
++    if (0 == strcmp(buf, "exit")) {
++      printf(1, "Server exiting...\n");
++      disconnect(serverPort);
++      break;
++    }
++
++    sleep(100 + uptime() % 100);
++
++    strcpy(buf+strlen(buf), " OK");
++    send(serverPort, buf, strlen(buf) + 1);
++  }
++}
++
++
++int main(int argc, char *argv[])
++{
++  if (0 == fork()) {
++    clientProc();
++    exit();
++  } else {
++    serverProc();
++    // This is the parent process. So, it needs to wait before client terminates
++    wait();
++    exit();
++  }
++}
+diff --git a/syscall.c b/syscall.c
+index ee85261..c06bb58 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -60,7 +60,7 @@ argptr(int n, char **pp, int size)
+ {
+   int i;
+   struct proc *curproc = myproc();
+- 
++
+   if(argint(n, &i) < 0)
+     return -1;
+   if(size < 0 || (uint)i >= curproc->sz || (uint)i+size > curproc->sz)
+@@ -103,6 +103,11 @@ extern int sys_unlink(void);
+ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
++extern int sys_listen(void);
++extern int sys_connect(void);
++extern int sys_send(void);
++extern int sys_recv(void);
++extern int sys_disconnect(void);
+ 
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+@@ -126,6 +131,11 @@ static int (*syscalls[])(void) = {
+ [SYS_link]    sys_link,
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
++[SYS_listen]  sys_listen,
++[SYS_connect] sys_connect,
++[SYS_send]    sys_send,
++[SYS_recv]    sys_recv,
++[SYS_disconnect] sys_disconnect
+ };
+ 
+ void
+diff --git a/syscall.h b/syscall.h
+index bc5f356..289fb4b 100644
+--- a/syscall.h
++++ b/syscall.h
+@@ -20,3 +20,8 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_listen  22
++#define SYS_connect  23
++#define SYS_send  24
++#define SYS_recv  25
++#define SYS_disconnect  26
+diff --git a/syssock.c b/syssock.c
+new file mode 100644
+index 0000000..4c006af
+--- /dev/null
++++ b/syssock.c
+@@ -0,0 +1,73 @@
++#include "types.h"
++#include "defs.h"
++#include "param.h"
++#include "memlayout.h"
++#include "mmu.h"
++#include "x86.h"
++#include "proc.h"
++
++int
++sys_listen(void)
++{
++  int port = 0;
++
++  //
++  // TODO: Write your code to get and validate port no.
++  //
++
++  return listen(port);
++}
++
++int
++sys_connect(void)
++{
++  int port = 0;
++  char *host = 0;
++
++  //
++  // TODO: Write your code to get and validate port no., host.
++  // Allow connection to "localhost" or "127.0.0.1" host only
++  //
++
++  return connect(port, host);
++}
++
++int
++sys_send(void)
++{
++  int port = 0;
++  char* buf = 0;
++  int n = 0;
++
++  //
++  // TODO: Write your code to get and validate port no., buffer and buffer size
++  //
++
++  return send(port, buf, n);
++}
++
++int
++sys_recv(void)
++{
++  int port = 0;
++  char* buf = 0;
++  int n = 0;
++
++  //
++  // TODO: Write your code to get and validate port no., buffer and buffer size
++  //
++
++  return recv(port, buf, n);
++}
++
++int
++sys_disconnect(void)
++{
++  int port = 0;
++
++  //
++  // TODO: Write your code to get and validate port no.
++  //
++
++  return disconnect(port);
++}
+diff --git a/user.h b/user.h
+index 4f99c52..ce9f2f1 100644
+--- a/user.h
++++ b/user.h
+@@ -23,6 +23,11 @@ int getpid(void);
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++int listen(int);
++int connect(int, const char* host);
++int send(int, const char*, int);
++int recv(int, char*, int);
++int disconnect(int);
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+diff --git a/usys.S b/usys.S
+index 8bfd8a1..2ac5ed0 100644
+--- a/usys.S
++++ b/usys.S
+@@ -29,3 +29,9 @@ SYSCALL(getpid)
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(listen)
++SYSCALL(connect)
++SYSCALL(send)
++SYSCALL(recv)
++SYSCALL(disconnect)
++
