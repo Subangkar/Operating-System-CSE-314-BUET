@@ -4,6 +4,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "sock.h"
 #include "x86.h"
 
 static void startothers(void);
@@ -27,6 +28,7 @@ main(void)
   consoleinit();   // console hardware
   uartinit();      // serial port
   pinit();         // process table
+  sinit();         // socket table
   tvinit();        // trap vectors
   binit();         // buffer cache
   fileinit();      // file table
