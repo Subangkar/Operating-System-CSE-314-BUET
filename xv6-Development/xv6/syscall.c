@@ -111,6 +111,7 @@ extern int sys_connect(void);
 extern int sys_send(void);
 extern int sys_recv(void);
 extern int sys_disconnect(void);
+extern int sys_getpages(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -140,6 +141,7 @@ static int (*syscalls[])(void) = {
 [SYS_send]    sys_send,
 [SYS_recv]    sys_recv,
 [SYS_disconnect] sys_disconnect
+[SYS_getpages] sys_getpages,
 };
 // system call added to system call array
 

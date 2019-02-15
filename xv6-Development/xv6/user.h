@@ -36,6 +36,7 @@ int recv(int, char*, int);
 /// disconnects from the remote port and closes the socket @ local-port
 /// local-port
 int disconnect(int);
+int getpages(void);
 
 int subangkar_shanto(void);
 // added system call function to link with user program

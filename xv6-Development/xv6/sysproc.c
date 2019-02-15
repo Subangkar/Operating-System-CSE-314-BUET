@@ -99,3 +99,13 @@ sys_subangkar_shanto(void)
   cprintf("Subangkar Karmaker Shanto 23-04-1997\n");
   return 1505015;
 }
+
+int
+sys_getpages(void)
+{
+  cprintf(" #Pages in RAM : %d\n",myproc()->page_mem_count);
+  cprintf(" #Pages in DISK: %d\n",myproc()->paged_out_count);
+  cprintf(" #Page Faults  : %d\n",myproc()->page_fault_count);
+  return (PGROUNDUP(myproc()->sz)/4096);
+//  return myproc()->page_mem_count;
+}

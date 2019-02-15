@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "swapUtils.h"
 
 struct {
   struct spinlock lock;
@@ -102,6 +103,17 @@ found:
   sp -= sizeof *p->tf;
   p->tf = (struct trapframe*)sp;
 
+  p->page_fault_count = 0;
+  p->paged_out_count = 0;
+  p->page_mem_count = 0;
+  p->fifoIndexStart=0;
+  p->fifoIndexNext=0;
+
+  if(!is_shell_or_init(p))
+    createSwapFile(p);
+
+	initSwapfile(p);
+
   // Set up new context to start executing at forkret,
   // which returns to trapret.
   sp -= 4;
@@ -197,6 +209,19 @@ fork(void)
     return -1;
   }
   np->sz = curproc->sz;
+
+  if (!is_shell_or_init(curproc)){
+    clone_file(curproc, np); // copy swapfile from parent(curproc) to child(np)
+    for (i = 0; i < MAX_PSYC_PAGES; i++){
+      np->ram_manager[i] = curproc->ram_manager[i];
+      np->ram_manager[i].pgdir = np->pgdir;
+    }
+    for (i = 0; i < MAX_FILE_PAGES; i++){
+      np->file_manager[i] = curproc->file_manager[i];
+      np->file_manager[i].pgdir = np->pgdir;
+    }
+  }
+
   np->parent = curproc;
   *np->tf = *curproc->tf;
 
@@ -241,6 +266,12 @@ exit(void)
       curproc->ofile[fd] = 0;
     }
   }
+  if(!is_shell_or_init(curproc)){
+    // removeSwapFile(curproc);
+    if (removeSwapFile(curproc) != 0)
+      panic("exit: error deleting swap file");
+    removeProcFiles(curproc);
+  }
 
   begin_op();
   iput(curproc->cwd);
@@ -265,6 +296,11 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+
+  #if TRUE
+    procdump();
+  #endif
+
   sched();
   panic("zombie exit");
 }
@@ -293,6 +329,12 @@ wait(void)
         p->kstack = 0;
         freevm(p->pgdir);
         p->pid = 0;
+
+        for (int i = 0; i < MAX_PSYC_PAGES; i++)
+          p->ram_manager[i].state = NOT_USED;
+        for (int i = 0; i < MAX_TOTAL_PAGES-MAX_PSYC_PAGES; i++)
+          p->file_manager[i].state = NOT_USED;
+
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
@@ -520,13 +562,16 @@ procdump(void)
   uint pc[10];
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    int allocatedPages = PGROUNDUP(p->sz)/PGSIZE;
     if(p->state == UNUSED)
       continue;
     if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s", p->pid, state, p->name);
+
+    cprintf("%d %s %d %d %d %d %s", p->pid, state, allocatedPages, getNumOfPagesInFile(p), p->page_fault_count, p->paged_out_count, p->name);
+    
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);
       for(i=0; i<10 && pc[i] != 0; i++)
@@ -534,4 +579,60 @@ procdump(void)
     }
     cprintf("\n");
   }
+
+  int freePages = getFreePages();
+  int TotalPages = getTotalPages();
+  cprintf("Used pages in the system: %d\n", TotalPages - freePages);
+  cprintf("Free pages in the system: %d/%d", freePages, TotalPages);
+  cprintf("\n");
+}
+
+
+int getNumOfPagesInMem(struct proc* p){
+	return p->page_mem_count;
+}
+
+int getNumOfPagesInFile(struct proc* p){
+  
+  int count = 0;
+  for(int i=0; i < (MAX_FILE_PAGES); i++){
+    if (p->file_manager[i].state == USED){
+      count++;
+    }
+  }
+  return count;
+}
+
+
+
+bool
+is_shell_or_init(struct proc* p){
+	return p && p->pid <= 2;
+}
+
+
+void initSwapfile(struct proc *p){
+
+  if(p == 0 || is_shell_or_init(p))
+    return;
+
+  for(int i=0; i < MAX_FILE_PAGES; i++)
+    p->file_manager[i].state = NOT_USED;
+
+}
+
+void removeProcFiles(struct proc* p){
+	p->page_mem_count = 0;
+	p->sz = 0;
+	for (int i = 0; i < MAX_PSYC_PAGES; ++i) {
+		p->ram_manager[i].state=NOT_USED;
+		p->ram_manager[i].vAddr=0xffffffff;
+	}
+	for (int i = 0; i < MAX_FILE_PAGES; ++i) {
+		p->file_manager[i].state=NOT_USED;
+		p->file_manager[i].vAddr=0xffffffff;
+	}
+
+	p->fifoIndexStart=0;
+	p->fifoIndexNext=0;
 }

@@ -25,6 +25,7 @@
 #define SYS_send  24
 #define SYS_recv  25
 #define SYS_disconnect  26
+#define SYS_getpages  28
 
 // added system call vector id
 #define SYS_subangkar_shanto  27

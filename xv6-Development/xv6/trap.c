@@ -78,6 +78,16 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+  // If the interupt was from atempting to access paged out data..
+  case T_PGFLT: {
+	  struct proc *p = myproc();
+	  if (p != 0 && !is_shell_or_init(p) &&
+	      (tf->cs & 3) == 3 && isPageInSwapFile(p, rcr2()) &&
+	      swap_in(p, rcr2())) { // soft page fault
+		  break;
+	  }
+	  // hard page fault
+  }
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){

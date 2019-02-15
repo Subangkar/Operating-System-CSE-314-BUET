@@ -35,4 +35,5 @@ SYSCALL(connect)
 SYSCALL(send)
 SYSCALL(recv)
 SYSCALL(disconnect)
+SYSCALL(getpages)
 
