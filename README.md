@@ -1,4 +1,4 @@
-## Operating System LAB Assignments of CSE, BUET  
+## Operating System LAB course (CSE 314) Assignments of CSE, BUET  
 
 Assignments:
 -
