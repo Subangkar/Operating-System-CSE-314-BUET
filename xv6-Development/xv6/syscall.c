@@ -140,7 +140,7 @@ static int (*syscalls[])(void) = {
 [SYS_connect] sys_connect,
 [SYS_send]    sys_send,
 [SYS_recv]    sys_recv,
-[SYS_disconnect] sys_disconnect
+[SYS_disconnect] sys_disconnect,
 [SYS_getpages] sys_getpages,
 };
 // system call added to system call array
