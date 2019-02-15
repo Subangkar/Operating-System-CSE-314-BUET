@@ -16,12 +16,14 @@ OBJS = \
 	pipe.o\
 	proc.o\
 	sleeplock.o\
+	sock.o\
 	spinlock.o\
 	string.o\
 	swtch.o\
 	syscall.o\
 	sysfile.o\
 	sysproc.o\
+	syssock.o\
 	trapasm.o\
 	trap.o\
 	uart.o\
@@ -182,6 +184,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_subangkar\
+	_socktest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

@@ -20,6 +20,11 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_listen  22
+#define SYS_connect  23
+#define SYS_send  24
+#define SYS_recv  25
+#define SYS_disconnect  26
 
 // added system call vector id
-#define SYS_subangkar_shanto  22
+#define SYS_subangkar_shanto  27
