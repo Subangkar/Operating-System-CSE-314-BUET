@@ -4,3 +4,12 @@
 Shell Script/Assignment1/workingDir/
 
 Shell Script/Assignment1/output/
+
+
+*.out
+
+**/cmake-build-debug/
+
+**/\.idea/
+
+IPC/CakeFactory/out\.log
