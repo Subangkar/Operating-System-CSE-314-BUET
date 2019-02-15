@@ -1,3 +1,7 @@
+#define MAX_PSYC_PAGES 15
+#define MAX_TOTAL_PAGES 30
+#define MAX_FILE_PAGES (MAX_TOTAL_PAGES - MAX_PSYC_PAGES)
+
 // Per-CPU state
 struct cpu {
   uchar apicid;                // Local APIC ID
@@ -32,6 +36,15 @@ struct context {
   uint eip;
 };
 
+enum page_state {NOT_USED, USED}; 
+
+// pages struct
+struct page_t {
+  enum page_state state;  
+  pde_t* pgdir;
+  addr_t vAddr;
+};
+
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
@@ -49,6 +62,17 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  //Swap file. must initiate with create swap file
+  struct file *swapFile;			//page file
+  struct page_t file_manager[MAX_FILE_PAGES];
+  struct page_t ram_manager[MAX_PSYC_PAGES];
+  uint page_mem_count;        // count of pages in ram
+  uint paged_out_count;       // count of pages in swap
+  uint page_fault_count;      // count of number of page fault times
+
+  // for circular queue
+  uint fifoIndexStart;        // head
+  uint fifoIndexNext;         // tail
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -56,3 +80,5 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+void removeProcFiles(struct proc* p);

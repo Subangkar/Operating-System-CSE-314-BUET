@@ -52,6 +52,15 @@ struct inode*   nameiparent(char*, char*);
 int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
+int             createSwapFile(struct proc* p);
+int             readFromSwapFile(struct proc * p, char* buffer, uint placeOnFile, uint size);
+int             writeToSwapFile(struct proc* p, char* buffer, uint placeOnFile, uint size);
+int             removeSwapFile(struct proc* p);
+int 			nextFreePageIndexInFile(struct proc *p);
+int 			page_out(struct proc * p, addr_t vAddr, pde_t *pgdir);
+int 			page_in(struct proc * p, int ram_managerIndex, addr_t vAddr, char* buff);
+void 			clone_file(struct proc* fromP, struct proc* toP);
+
 
 // ide.c
 void            ideinit(void);
@@ -68,6 +77,8 @@ char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+int 			getTotalPages();
+int 			getFreePages();
 
 // kbd.c
 void            kbdintr(void);
@@ -120,9 +131,18 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+bool 			is_shell_or_init(struct proc* p);
+int 			getNumOfPagesInMem(struct proc* p);
+int 			getNumOfPagesInFile(struct proc* p);
+void 			initSwapfile(struct proc *p);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
+
+// sysfile
+struct inode*   create(char *path, short type, short major, short minor);
+int             isdirempty(struct inode *dp);
+
 
 // spinlock.c
 void            acquire(struct spinlock*);
@@ -185,6 +205,10 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+
+int 			swap_in(struct proc* p, int cr2);
+void 			swap_out(struct proc *p, pde_t *pgdir, addr_t vAddr);
+bool 			isPageInSwapFile(struct proc *p, int vAddr);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

@@ -89,3 +89,13 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_getpages(void)
+{
+  cprintf(" #Pages in RAM : %d\n",myproc()->page_mem_count);
+  cprintf(" #Pages in DISK: %d\n",myproc()->paged_out_count);
+  cprintf(" #Page Faults  : %d\n",myproc()->page_fault_count);
+  return (PGROUNDUP(myproc()->sz)/4096);
+//  return myproc()->page_mem_count;
+}
