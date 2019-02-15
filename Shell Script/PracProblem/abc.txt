@@ -1,0 +1,7 @@
+text find
+replace 
+habijabi 
+default 
+file
+
+
